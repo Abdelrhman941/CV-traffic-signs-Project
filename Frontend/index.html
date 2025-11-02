@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traffic Sign AI - Recognition System</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='20' y='5' width='60' height='90' rx='15' fill='%23333' stroke='%239b9bff' stroke-width='3'/><circle cx='50' cy='25' r='10' fill='%23ff6b6b'/><circle cx='50' cy='50' r='10' fill='%23ffd93d'/><circle cx='50' cy='75' r='10' fill='%2351cf66'/></svg>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <i class="fas fa-traffic-light logo-icon"></i>
+                <span class="logo-text">Traffic Sign AI</span>
+            </div>
+            <nav class="nav">
+                <a href="#home" class="nav-link active">Home</a>
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#about" class="nav-link">About</a>
+                <div class="api-status">
+                    <span class="status-dot" id="statusDot"></span>
+                    <span id="statusText">API Offline</span>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    <span class="gradient-text">Traffic Sign</span>
+                    <br>Recognition System
+                </h1>
+                <p class="hero-subtitle">
+                    Advanced AI-powered traffic sign detection and classification using deep learning and computer vision
+                </p>
+                <div class="hero-stats">
+                    <div class="stat-card">
+                        <i class="fas fa-layer-group stat-icon"></i>
+                        <div class="stat-number">43</div>
+                        <div class="stat-label">Sign Classes</div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-microchip stat-icon"></i>
+                        <div class="stat-number">GPU</div>
+                        <div class="stat-label">Processing</div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-chart-line stat-icon"></i>
+                        <div class="stat-number">95%+</div>
+                        <div class="stat-label">Accuracy</div>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <i class="fas fa-road floating-sign"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- Image Processing Pipeline -->
+    <section class="pipeline" id="features">
+        <div class="container">
+            <h2 class="section-title">Image Processing Pipeline</h2>
+            <p class="section-subtitle">Upload an image and watch the AI process it step by step</p>
+
+            <!-- Upload Section -->
+            <div class="upload-section">
+                <div class="upload-area" id="uploadArea">
+                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                    <h3>Drop your image here</h3>
+                    <p>or click to browse</p>
+                    <p class="upload-support">Supports: JPG, PNG, JPEG</p>
+                    <input type="file" id="fileInput" accept="image/*" hidden>
+                </div>
+            </div>
+
+            <!-- Pipeline Steps -->
+            <div class="pipeline-tabs">
+                <button class="tab-btn active" data-tab="preprocessing">
+                    <i class="fas fa-sliders-h tab-icon"></i>
+                    Preprocessing
+                </button>
+                <button class="tab-btn" data-tab="segmentation">
+                    <i class="fas fa-cut tab-icon"></i>
+                    Segmentation
+                </button>
+                <button class="tab-btn" data-tab="classification">
+                    <i class="fas fa-brain tab-icon"></i>
+                    Classification
+                </button>
+            </div>
+
+            <!-- Preprocessing Tab -->
+            <div class="tab-content active" id="preprocessing">
+                <div class="processing-grid">
+                    <div class="controls-panel">
+                        <h3 class="panel-title">
+                            <i class="fas fa-cog panel-icon"></i>
+                            Preprocessing Controls
+                        </h3>
+                        <div class="toggle-container">
+                            <label class="toggle-label">
+                                <input type="checkbox" id="autoUpdate" checked>
+                                <span class="toggle-switch"></span>
+                                Auto-Update
+                            </label>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">
+                                <i class="fas fa-arrows-alt-h label-icon"></i>
+                                Resize Width: <span id="resizeWidthValue">256</span> px
+                            </label>
+                            <input type="range" id="resizeWidth" min="64" max="512" value="256" class="slider">
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">
+                                <i class="fas fa-arrows-alt-v label-icon"></i>
+                                Resize Height: <span id="resizeHeightValue">256</span> px
+                            </label>
+                            <input type="range" id="resizeHeight" min="64" max="512" value="256" class="slider">
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">
+                                <i class="fas fa-filter label-icon"></i>
+                                Noise Reduction: <span id="noiseReductionValue">5</span>
+                            </label>
+                            <input type="range" id="noiseReduction" min="0" max="10" value="5" class="slider">
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">
+                                <i class="fas fa-sun label-icon"></i>
+                                Brightness Alpha: <span id="brightnessAlphaValue">1.0</span>
+                            </label>
+                            <input type="range" id="brightnessAlpha" min="0.5" max="2.0" step="0.1" value="1.0" class="slider">
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">
+                                <i class="fas fa-adjust label-icon"></i>
+                                Brightness Beta: <span id="brightnessBetaValue">50</span>
+                            </label>
+                            <input type="range" id="brightnessBeta" min="0" max="100" value="50" class="slider">
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">
+                                <i class="fas fa-circle-half-stroke label-icon"></i>
+                                Contrast: <span id="contrastValue">2</span>
+                            </label>
+                            <input type="range" id="contrast" min="0" max="5" value="2" class="slider">
+                        </div>
+
+                        <div class="control-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="toGrayscale" checked>
+                                <i class="fas fa-palette label-icon"></i>
+                                Convert to Grayscale
+                            </label>
+                        </div>
+
+                        <button class="btn btn-primary" id="applyPreprocessing">
+                            Apply Preprocessing
+                        </button>
+                        <button class="btn btn-secondary" id="usePreprocessedNext">
+                            Use in Next Step →
+                        </button>
+                    </div>
+
+                    <div class="preview-panel">
+                        <div class="image-comparison">
+                            <div class="image-container">
+                                <h4 class="image-title">Original Image</h4>
+                                <div class="image-wrapper" id="originalPreview">
+                                    <div class="placeholder">No image uploaded</div>
+                                </div>
+                            </div>
+                            <div class="image-container">
+                                <h4 class="image-title">Preprocessed Image</h4>
+                                <div class="image-wrapper" id="preprocessedPreview">
+                                    <div class="placeholder">No processing applied</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Segmentation Tab -->
+            <div class="tab-content" id="segmentation">
+                <div class="processing-grid">
+                    <div class="controls-panel">
+                        <h3 class="panel-title">
+                            <i class="fas fa-cog panel-icon"></i>
+                            Segmentation Controls
+                        </h3>
+
+                        <div class="control-group">
+                            <label class="control-label">
+                                <i class="fas fa-image label-icon"></i>
+                                Image Source
+                            </label>
+                            <select id="segmentationSource" class="select-input">
+                                <option value="original">Original Image</option>
+                                <option value="preprocessed">Preprocessed Image</option>
+                            </select>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">
+                                <i class="fas fa-tasks label-icon"></i>
+                                Segmentation Method
+                            </label>
+                            <select id="segmentationMethod" class="select-input">
+                                <option value="otsu">Otsu Threshold</option>
+                                <option value="adaptive_mean">Adaptive Mean</option>
+                                <option value="chow_kaneko">Chow-Kaneko</option>
+                                <option value="cheng_jin_kuo">Cheng-Jin-Kuo</option>
+                            </select>
+                        </div>
+
+                        <div class="control-group" id="blockSizeGroup">
+                            <label class="control-label">
+                                <i class="fas fa-th label-icon"></i>
+                                Block Size: <span id="blockSizeValue">15</span>
+                            </label>
+                            <input type="range" id="blockSize" min="3" max="51" step="2" value="15" class="slider">
+                        </div>
+
+                        <div class="control-group" id="cValueGroup">
+                            <label class="control-label">
+                                <i class="fas fa-chart-bar label-icon"></i>
+                                C Value: <span id="cValue">5</span>
+                            </label>
+                            <input type="range" id="cParam" min="1" max="20" value="5" class="slider">
+                        </div>
+
+                        <div class="control-group" id="kValueGroup" style="display: none;">
+                            <label class="control-label">
+                                <i class="fas fa-percentage label-icon"></i>
+                                K Value: <span id="kValue">0.5</span>
+                            </label>
+                            <input type="range" id="kParam" min="0" max="1" step="0.1" value="0.5" class="slider">
+                        </div>
+
+                        <button class="btn btn-primary" id="applySegmentation">
+                            Apply Segmentation
+                        </button>
+                        <button class="btn btn-secondary" id="useSegmentedNext">
+                            Use in Next Step →
+                        </button>
+                    </div>
+
+                    <div class="preview-panel">
+                        <div class="image-comparison">
+                            <div class="image-container">
+                                <h4 class="image-title">Input Image</h4>
+                                <div class="image-wrapper" id="segmentationInput">
+                                    <div class="placeholder">No image selected</div>
+                                </div>
+                            </div>
+                            <div class="image-container">
+                                <h4 class="image-title">Segmented Image</h4>
+                                <div class="image-wrapper" id="segmentedPreview">
+                                    <div class="placeholder">No segmentation applied</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Classification Tab -->
+            <div class="tab-content" id="classification">
+                <div class="processing-grid">
+                    <div class="controls-panel">
+                        <h3 class="panel-title">
+                            <i class="fas fa-cog panel-icon"></i>
+                            Classification
+                        </h3>
+
+                        <div class="control-group">
+                            <label class="control-label">
+                                <i class="fas fa-image label-icon"></i>
+                                Image Source
+                            </label>
+                            <select id="classificationSource" class="select-input">
+                                <option value="original">Original Image</option>
+                                <option value="preprocessed">Preprocessed Image</option>
+                                <option value="segmented">Segmented Image</option>
+                            </select>
+                        </div>
+
+                        <button class="btn btn-primary" id="classifyImage">
+                            <i class="fas fa-brain"></i> Classify Traffic Sign
+                        </button>
+
+                        <div class="prediction-result" id="predictionResult">
+                            <h4>Prediction Result</h4>
+                            <div class="prediction-main" id="predictionMain">
+                                <div class="prediction-class">-</div>
+                                <div class="prediction-confidence">
+                                    <div class="confidence-bar">
+                                        <div class="confidence-fill" style="width: 0%"></div>
+                                    </div>
+                                    <span class="confidence-text">0%</span>
+                                </div>
+                            </div>
+
+                            <h5>Top 5 Predictions</h5>
+                            <div class="top-predictions" id="topPredictions">
+                                <!-- Top 5 predictions will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="preview-panel">
+                        <div class="image-comparison">
+                            <div class="image-container full-width">
+                                <h4 class="image-title">Image for Classification</h4>
+                                <div class="image-wrapper" id="classificationInput">
+                                    <div class="placeholder">No image selected</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about" id="about">
+        <div class="container">
+            <h2 class="section-title">About the System</h2>
+            <p class="section-subtitle">Learn how our AI-powered traffic sign recognition works</p>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🧠</div>
+                    <h3>Deep Learning</h3>
+                    <p>Powered by a custom CNN architecture trained on thousands of traffic sign images</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🖼️</div>
+                    <h3>Image Processing</h3>
+                    <p>Advanced preprocessing, segmentation, and feature extraction techniques</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Real-time Analysis</h3>
+                    <p>Fast and efficient classification with instant results</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>High Accuracy</h3>
+                    <p>Achieves over 95% accuracy on German Traffic Sign Recognition Benchmark</p>
+                </div>
+            </div>
+
+            <div class="tech-stack">
+                <h3>Technology</h3>
+                <div class="tech-items">
+                    <div class="tech-item">
+                        <span class="tech-icon">✓</span>
+                        PyTorch
+                    </div>
+                    <div class="tech-item">
+                        <span class="tech-icon">✓</span>
+                        FastAPI
+                    </div>
+                    <div class="tech-item">
+                        <span class="tech-icon">✓</span>
+                        Computer Vision
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>🚦 Traffic Sign AI</h4>
+                    <p>Advanced AI-powered traffic sign recognition system</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Features</h4>
+                    <ul>
+                        <li>43 Sign Classes</li>
+                        <li>Real-time Processing</li>
+                        <li>High Accuracy</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2024 Traffic Sign Recognition System.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <p>Processing...</p>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
