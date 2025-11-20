@@ -3,6 +3,19 @@
 > ![alt text](images/1.png)
 AI-powered traffic sign classification system with PyTorch CNN, featuring both CLI tools and a modern web interface. Achieves 95%+ accuracy on German Traffic Sign Recognition Benchmark (GTSRB).
 
+<p align="center">
+  <a href="https://youtu.be/xWEPut6oU2Q" target="_blank">
+    <img src="https://img.youtube.com/vi/xWEPut6oU2Q/0.jpg" 
+         alt="Project Demo Video" 
+         style="width:70%; border-radius:10px;">
+  </a>
+</p>
+
+<p align="center">
+  <strong>▶ Watch the Demo Video</strong>
+</p>
+
+
 ## 🌟 Key Features
 
 - **Deep Learning**: Custom CNN with PyTorch for 43 traffic sign classes
