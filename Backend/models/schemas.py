@@ -65,3 +65,14 @@ class UploadResponse(BaseModel):
     success: bool
     original_image: Optional[str] = None  # Base64 encoded
     error: Optional[str] = None
+
+
+"""
+UploadResponse        → original_image
+PreprocessRequest     → Image + Params
+ImageResponse         → processed_image
+SegmentRequest        → Image + Params
+ClassifyRequest       → Image
+ClassifyResponse      → Prediction(s)
+
+"""
