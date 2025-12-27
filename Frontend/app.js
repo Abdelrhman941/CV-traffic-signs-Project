@@ -10,6 +10,37 @@ const state = {
     autoUpdate: true,
 };
 
+// Toast Notification System
+function showToast(message, type = 'info', duration = 3000) {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+
+    // Icon based on type
+    const icons = {
+        success: '<i class="fas fa-check-circle"></i>',
+        error: '<i class="fas fa-times-circle"></i>',
+        warning: '<i class="fas fa-exclamation-triangle"></i>',
+        info: '<i class="fas fa-info-circle"></i>'
+    };
+
+    toast.innerHTML = `
+        ${icons[type] || icons.info}
+        <span>${message}</span>
+    `;
+
+    container.appendChild(toast);
+
+    // Trigger animation
+    setTimeout(() => toast.classList.add('show'), 10);
+
+    // Auto remove
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => container.removeChild(toast), 300);
+    }, duration);
+}
+
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
     initializeApp();
@@ -108,7 +139,7 @@ async function handleFileUpload(file) {
         }
     } catch (error) {
         console.error('Upload error:', error);
-        alert('Error uploading image. Please try again.');
+        showToast('Error uploading image. Please try again.', 'error');
     } finally {
         hideLoading();
     }
@@ -203,14 +234,14 @@ function setupPreprocessingControls() {
             displayImage('segmentationInput', state.preprocessedImage);
             switchTab('segmentation');
         } else {
-            alert('Please apply preprocessing first.');
+            showToast('Please apply preprocessing first.', 'warning');
         }
     });
 }
 
 async function applyPreprocessing() {
     if (!state.originalImage) {
-        alert('Please upload an image first.');
+        showToast('Please upload an image first.', 'warning');
         return;
     }
 
@@ -243,10 +274,13 @@ async function applyPreprocessing() {
         if (data.success) {
             state.preprocessedImage = data.processed_image;
             displayImage('preprocessedPreview', data.processed_image);
+            showToast('Preprocessing applied successfully!', 'success');
+        } else if (data.error) {
+            showToast(data.error, 'error');
         }
     } catch (error) {
         console.error('Preprocessing error:', error);
-        alert('Error applying preprocessing. Please try again.');
+        showToast('Error applying preprocessing. Please try again.', 'error');
     } finally {
         hideLoading();
     }
@@ -278,7 +312,7 @@ function setupSegmentationControls() {
             displayImage('classificationInput', state.segmentedImage);
             switchTab('classification');
         } else {
-            alert('Please apply segmentation first.');
+            showToast('Please apply segmentation first.', 'warning');
         }
     });
 
@@ -365,12 +399,15 @@ async function applySegmentation() {
         const data = await response.json();
 
         if (data.success) {
-            state.segmentedImage = data.segmented_image;
-            displayImage('segmentedPreview', data.segmented_image);
+            state.segmentedImage = data.processed_image;
+            displayImage('segmentedPreview', data.processed_image);
+            showToast('Segmentation applied successfully!', 'success');
+        } else if (data.error) {
+            showToast(data.error, 'error');
         }
     } catch (error) {
         console.error('Segmentation error:', error);
-        alert('Error applying segmentation. Please try again.');
+        showToast('Error applying segmentation. Please try again.', 'error');
     } finally {
         hideLoading();
     }
@@ -418,7 +455,7 @@ async function classifyImage() {
     }
 
     if (!imageData) {
-        alert('Please select an image source first.');
+        showToast('Please select an image source first.', 'warning');
         return;
     }
 
@@ -439,12 +476,13 @@ async function classifyImage() {
 
         if (data.success && data.prediction) {
             displayPredictionResult(data);
+            showToast('Classification successful!', 'success');
         } else if (data.error) {
-            alert(data.error);
+            showToast(data.error, 'error');
         }
     } catch (error) {
         console.error('Classification error:', error);
-        alert('Error classifying image. Please try again.');
+        showToast('Error classifying image. Please try again.', 'error');
     } finally {
         hideLoading();
     }

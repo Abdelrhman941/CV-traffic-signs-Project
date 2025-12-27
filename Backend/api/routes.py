@@ -62,14 +62,30 @@ def decode_base64_image(base64_str: str) -> np.ndarray:
 def encode_image_to_base64(image: np.ndarray) -> str:
     """Encode numpy array to base64 string."""
     try:
+        # Normalize image to 0-255 range
+        if image.dtype == np.float32 or image.dtype == np.float64:
+            # Float image (0-1 range), convert to 0-255
+            image = (image * 255).astype(np.uint8)
+        elif image.dtype != np.uint8:
+            # Other types, ensure uint8
+            image = image.astype(np.uint8)
+
         # Handle grayscale vs color
         if len(image.shape) == 2:
-            # Grayscale
-            pil_image = Image.fromarray((image * 255).astype(np.uint8) if image.max() <= 1 else image.astype(np.uint8))
+            # Grayscale - convert to PIL
+            pil_image = Image.fromarray(image, mode="L")
+        elif len(image.shape) == 3:
+            if image.shape[2] == 1:
+                # Single channel (H, W, 1) -> squeeze to (H, W)
+                pil_image = Image.fromarray(image.squeeze(), mode="L")
+            elif image.shape[2] == 3:
+                # Color - convert BGR to RGB
+                image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                pil_image = Image.fromarray(image_rgb, mode="RGB")
+            else:
+                raise ValueError(f"Unsupported image shape: {image.shape}")
         else:
-            # Color - convert BGR to RGB
-            image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) if image.shape[2] == 3 else image
-            pil_image = Image.fromarray(image_rgb.astype(np.uint8) if image.max() > 1 else (image_rgb * 255).astype(np.uint8))
+            raise ValueError(f"Invalid image dimensions: {image.shape}")
 
         # Convert to bytes
         buffer = io.BytesIO()

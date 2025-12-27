@@ -19,32 +19,38 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
-# Check Python
-if ! command_exists python && ! command_exists python3; then
-    echo -e "${RED}❌ Python is not installed!${NC}"
-    exit 1
-fi
+# Check if we're in a conda/mamba environment
+if [ ! -z "$CONDA_DEFAULT_ENV" ] || [ ! -z "$MAMBA_DEFAULT_ENV" ]; then
+    ENV_NAME="${CONDA_DEFAULT_ENV:-$MAMBA_DEFAULT_ENV}"
+    echo -e "${GREEN}✅ Conda/Mamba environment: $ENV_NAME${NC}"
 
-PYTHON_CMD=$(command_exists python3 && echo "python3" || echo "python")
-echo -e "${GREEN}✅ Python found: $PYTHON_CMD${NC}"
-
-# Check if virtual environment exists
-if [ ! -d "venv" ] && [ ! -d ".venv" ]; then
-    echo -e "${YELLOW}⚠️  No virtual environment found${NC}"
-    echo -e "${BLUE}-? Creating virtual environment...${NC}"
-    $PYTHON_CMD -m venv venv
-
-    # Activate virtual environment
-    if [ -f "venv/bin/activate" ]; then
-        source venv/bin/activate
-    elif [ -f "venv/Scripts/activate" ]; then
-        source venv/Scripts/activate
+    # Try to find Python in conda environment
+    if command_exists python; then
+        PYTHON_CMD="python"
+    elif command_exists python3; then
+        PYTHON_CMD="python3"
+    elif [ ! -z "$CONDA_PREFIX" ] && [ -f "$CONDA_PREFIX/bin/python" ]; then
+        PYTHON_CMD="$CONDA_PREFIX/bin/python"
+    elif [ ! -z "$CONDA_PREFIX" ] && [ -f "$CONDA_PREFIX/python.exe" ]; then
+        PYTHON_CMD="$CONDA_PREFIX/python.exe"
+    else
+        echo -e "${RED}❌ Python not found in conda environment!${NC}"
+        exit 1
     fi
 
-    echo -e "${BLUE}-> Installing dependencies...${NC}"
-    pip install --upgrade pip
-    pip install -r requirements.txt
-else
+    echo -e "${GREEN}✅ Python: $PYTHON_CMD${NC}"
+    $PYTHON_CMD --version
+
+    # Verify dependencies
+    echo -e "${BLUE}📦 Verifying dependencies...${NC}"
+    $PYTHON_CMD -c "import fastapi, torch, cv2" 2>/dev/null
+    if [ $? -ne 0 ]; then
+        echo -e "${YELLOW}⚠️  Installing missing dependencies...${NC}"
+        pip install -r requirements.txt
+    fi
+
+# Check if virtual environment exists
+elif [ -d "venv" ] || [ -d ".venv" ]; then
     echo -e "${GREEN}✅ Virtual environment found${NC}"
 
     # Activate virtual environment
@@ -57,6 +63,38 @@ else
     elif [ -f ".venv/Scripts/activate" ]; then
         source .venv/Scripts/activate
     fi
+
+    PYTHON_CMD=$(command_exists python && echo "python" || echo "python3")
+    echo -e "${GREEN}✅ Python: $PYTHON_CMD${NC}"
+
+# No environment found
+else
+    echo -e "${YELLOW}⚠️  No environment found${NC}"
+
+    # Check Python
+    if command_exists python; then
+        PYTHON_CMD="python"
+    elif command_exists python3; then
+        PYTHON_CMD="python3"
+    else
+        echo -e "${RED}❌ Python is not installed!${NC}"
+        exit 1
+    fi
+
+    echo -e "${GREEN}✅ Python: $PYTHON_CMD${NC}"
+    echo -e "${BLUE}📦 Creating virtual environment...${NC}"
+    $PYTHON_CMD -m venv venv
+
+    # Activate virtual environment
+    if [ -f "venv/bin/activate" ]; then
+        source venv/bin/activate
+    elif [ -f "venv/Scripts/activate" ]; then
+        source venv/Scripts/activate
+    fi
+
+    echo -e "${BLUE}📦 Installing dependencies...${NC}"
+    pip install --upgrade pip
+    pip install -r requirements.txt
 fi
 
 # Check if model exists
@@ -76,10 +114,10 @@ fi
 
 # Start backend server
 echo -e "${BLUE}-> Starting backend server...${NC}"
-cd Backend
-$PYTHON_CMD -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload &
+
+# Use absolute path for Python module
+$PYTHON_CMD -m uvicorn Backend.main:app --host 0.0.0.0 --port 8000 --reload &
 BACKEND_PID=$!
-cd ..
 
 # Wait for backend to start
 echo -e "${BLUE}⏳ Waiting for backend to start...${NC}"
