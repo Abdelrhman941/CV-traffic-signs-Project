@@ -1,95 +1,123 @@
 #!/bin/bash
 
-# Traffic Sign Recognition System - Quick Start Script
-# Starts both Backend API and Frontend Server
+# Traffic Sign Recognition System - Run Script
+# This script starts both frontend and backend servers
 
-echo "🚦 Traffic Sign Recognition System - Quick Start"
-echo "================================================"
-echo ""
+echo "------------------------------------------------------------"
+echo "🚦 Traffic Sign Recognition System"
+echo "------------------------------------------------------------"
 
-# Check if Python is installed
-if ! command -v python &> /dev/null; then
-    echo "❌ Python is not installed. Please install Python 3.8 or higher."
+# Colors for output
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Function to check if a command exists
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+# Check Python
+if ! command_exists python && ! command_exists python3; then
+    echo -e "${RED}❌ Python is not installed!${NC}"
     exit 1
 fi
 
-echo "✅ Python found: $(python --version)"
-echo ""
+PYTHON_CMD=$(command_exists python3 && echo "python3" || echo "python")
+echo -e "${GREEN}✅ Python found: $PYTHON_CMD${NC}"
 
-# Check if model file exists
-if [ ! -f "models/traffic_sign_model.pth" ]; then
-    echo "⚠️  Warning: Model file not found at models/traffic_sign_model.pth"
-    echo "   Please ensure the trained model is in the correct location."
-    echo ""
-fi
+# Check if virtual environment exists
+if [ ! -d "venv" ] && [ ! -d ".venv" ]; then
+    echo -e "${YELLOW}⚠️  No virtual environment found${NC}"
+    echo -e "${BLUE}-? Creating virtual environment...${NC}"
+    $PYTHON_CMD -m venv venv
 
-# Move to backend directory
-echo "📦 Checking backend setup..."
-cd Backend || { echo "❌ Backend folder not found!"; exit 1; }
+    # Activate virtual environment
+    if [ -f "venv/bin/activate" ]; then
+        source venv/bin/activate
+    elif [ -f "venv/Scripts/activate" ]; then
+        source venv/Scripts/activate
+    fi
 
-# Create virtual environment if missing
-if [ ! -d "venv" ]; then
-    echo "Creating virtual environment..."
-    python -m venv venv
-fi
-
-# Activate virtual environment
-if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
-    source venv/Scripts/activate
+    echo -e "${BLUE}-> Installing dependencies...${NC}"
+    pip install --upgrade pip
+    pip install -r requirements.txt
 else
-    source venv/bin/activate
+    echo -e "${GREEN}✅ Virtual environment found${NC}"
+
+    # Activate virtual environment
+    if [ -f "venv/bin/activate" ]; then
+        source venv/bin/activate
+    elif [ -f ".venv/bin/activate" ]; then
+        source .venv/bin/activate
+    elif [ -f "venv/Scripts/activate" ]; then
+        source venv/Scripts/activate
+    elif [ -f ".venv/Scripts/activate" ]; then
+        source .venv/Scripts/activate
+    fi
 fi
 
-echo ""
+# Check if model exists
+if [ ! -f "notebooks/best_model.pth" ]; then
+    echo -e "${RED}❌ Model file not found!${NC}"
+    echo -e "${YELLOW}   Expected: notebooks/best_model.pth${NC}"
+    exit 1
+fi
+echo -e "${GREEN}✅ Model file found${NC}"
 
-# Ask user whether to install dependencies
-read -p "❓  Do you want to install dependencies from requirements.txt? (y/n): " install_choice
-
-if [[ "$install_choice" == "y" || "$install_choice" == "Y" ]]; then
-    echo "Installing/updating dependencies..."
-    pip install -q -r requirements.txt
-    echo "✅ Dependencies installed."
-else
-    echo "⏩ Skipping dependency installation."
+# Kill any existing servers on port 8000
+echo -e "${BLUE}-> Checking for existing servers...${NC}"
+if lsof -Pi :8000 -sTCP:LISTEN -t >/dev/null 2>&1; then
+    echo -e "${YELLOW}⚠️  Port 8000 is in use, killing existing process...${NC}"
+    kill -9 $(lsof -t -i:8000) 2>/dev/null
 fi
 
-python main.py &
+# Start backend server
+echo -e "${BLUE}-> Starting backend server...${NC}"
+cd Backend
+$PYTHON_CMD -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload &
 BACKEND_PID=$!
+cd ..
 
-# Wait a few seconds for backend startup
+# Wait for backend to start
+echo -e "${BLUE}⏳ Waiting for backend to start...${NC}"
 sleep 3
 
-# Start frontend
-cd ../Frontend || { echo "❌ Frontend folder not found!"; exit 1; }
+# Check if backend is running
+if ! ps -p $BACKEND_PID > /dev/null; then
+    echo -e "${RED}❌ Backend failed to start!${NC}"
+    exit 1
+fi
 
-python -m http.server 8080 &
-FRONTEND_PID=$!
+echo -e "${GREEN}✅ Backend started successfully (PID: $BACKEND_PID)${NC}"
 
-echo "================================================"
-echo "🎉 Application is ready!"
+# Open browser
+echo -e "${BLUE}- Opening browser...${NC}"
+sleep 2
+
+# Detect OS and open browser
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    xdg-open http://localhost:8000 2>/dev/null
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    open http://localhost:8000
+elif [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
+    start http://localhost:8000
+else
+    echo -e "${YELLOW}⚠️  Could not detect OS. Please open http://localhost:8000 manually${NC}"
+fi
+
 echo ""
-echo "- Open your browser and navigate to:"
-echo "   http://localhost:8080"
-echo ""
-echo "- API Documentation:"
-echo "   http://localhost:8000/docs"
-echo ""
-echo "Press Ctrl+C to stop all servers"
-echo "================================================"
-echo ""
+echo "------------------------------------------------------------"
+echo -e "${GREEN}✅ System is running!${NC}"
+echo "------------------------------------------------------------"
+echo -e "- Frontend   : ${BLUE}http://localhost:8000${NC}"
+echo -e "- API Docs   : ${BLUE}http://localhost:8000/docs${NC}"
+echo -e "- API Health : ${BLUE}http://localhost:8000/api/health${NC}"
+echo "------------------------------------------------------------"
+echo -e "${YELLOW}Press Ctrl+C to stop all servers${NC}"
+echo "------------------------------------------------------------"
 
-# Cleanup function
-cleanup() {
-    echo ""
-    echo "🛑 Stopping servers..."
-    kill $BACKEND_PID 2>/dev/null
-    kill $FRONTEND_PID 2>/dev/null
-    echo "✅ All servers stopped"
-    exit 0
-}
-
-# Trap Ctrl+C
-trap cleanup INT
-
-# Wait for user to stop manually
-wait
+# Wait for user interrupt
+wait $BACKEND_PID

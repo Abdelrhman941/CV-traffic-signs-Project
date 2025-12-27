@@ -1,163 +1,342 @@
-# Traffic Sign Recognition System 🚦
+# **🚦 Traffic Sign Recognition System**
 
-> ![alt text](images/1.png)
-AI-powered traffic sign classification system with PyTorch CNN, featuring both CLI tools and a modern web interface. Achieves 95%+ accuracy on German Traffic Sign Recognition Benchmark (GTSRB).
+Advanced AI-powered traffic sign detection and classification system using deep learning and computer vision.
 
-<p align="center">
-  <a href="https://youtu.be/xWEPut6oU2Q" target="_blank">
-    <img src="https://img.youtube.com/vi/xWEPut6oU2Q/0.jpg" 
-         alt="Project Demo Video" 
-         style="width:70%; border-radius:10px;">
-  </a>
-</p>
+<body>
+    <div style = "
+        width: 100%;
+        border-radius: 100px;
+        height: 20px;
+        background: linear-gradient(to right,#B6AE9F,#C5C7BC,#DEDED1,#C5C7BC,#B6AE9F);">
+    </div>
+</body>
 
-<p align="center">
-  <strong>▶ Watch the Demo Video</strong>
-</p>
+## **📋 Features**
 
+- **43 Traffic Sign Classes** - Complete German Traffic Sign Recognition Benchmark (GTSRB) support
+- **Advanced Preprocessing** - Brightness adjustment, contrast enhancement, noise reduction, and edge detection
+- **Multiple Segmentation Methods** - Otsu, Adaptive Mean, Chow-Kaneko, and Cheng-Jin-Kuo thresholding
+- **Deep Learning Classification** - Custom CNN architecture with 95%+ accuracy
+- **Interactive Web Interface** - Real-time image processing pipeline visualization
+- **RESTful API** - FastAPI backend with comprehensive endpoints
 
-## 🌟 Key Features
+<body>
+    <div style = "
+        width: 100%;
+        border-radius: 100px;
+        height: 20px;
+        background: linear-gradient(to right,#B6AE9F,#C5C7BC,#DEDED1,#C5C7BC,#B6AE9F);">
+    </div>
+</body>
 
-- **Deep Learning**: Custom CNN with PyTorch for 43 traffic sign classes
-- **Computer Vision**: Advanced preprocessing, segmentation & feature extraction
-- **Modern Web UI**: Beautiful HTML/CSS/JS frontend + FastAPI backend
-- **Old Streamlit GUI**: Simple prototype interface (deprecated)
-- **CLI Tools**: Training, evaluation, and prediction scripts
-- **GPU Support**: Automatic CUDA acceleration
-
-## 📁 Project Structure
+## **Project Structure**
 
 ```
-traffic-sign-recognition/
-├── Backend/                  # FastAPI REST API server
-│   ├── __init__.py           # Package initialization
-│   ├── config.py             # Backend configuration
-│   └── main.py               # API endpoints & model inference
+├── Data/                      # Dataset (GTSRB)
 │
-├── Frontend/                 # Modern web interface
-│   ├── app.js                # Interactive controls & API calls
-│   ├── index.html            # Main page with Font Awesome icons
-│   └── styles.css            # Eye-friendly design & responsive layout
+├── Backend/
+│   ├── api/
+│   │   ├── __init__.py
+│   │   └── routes.py          # API endpoints
+│   ├── models/
+│   │   ├── __init__.py
+│   │   └── schemas.py         # Pydantic models
+│   ├── utils/
+│   │   ├── __init__.py
+│   │   └── helpers.py         # Preprocessing & utilities
+│   ├── __init__.py
+│   ├── config.py              # Configuration settings
+│   ├── main.py                # FastAPI application
+│   └── .env                   # Environment variables
 │
-├── images/                   # Screenshot images for documentation
-│   ├── 1.png                 # UI screenshot
-│   ├── 2.png                 # UI screenshot
-│   ├── 3.png                 # UI screenshot
-│   ├── 4.png                 # UI screenshot
-│   ├── 5.png                 # UI screenshot
-│   ├── 6.png                 # UI screenshot
-│   └── traffic-lights.png    # Logo/icon
+├── Frontend/
+│   ├── index.html             # Web interface
+│   ├── app.js                 # Frontend logic
+│   └── styles.css             # Styling
 │
-├── models/                    # Saved model checkpoints
-│   └── traffic_sign_model.pth # Trained CNN weights
+├── notebooks/
+│   ├── code.ipynb             # Training & experiments
+│   └── best_model.pth         # Trained model weights
 │
-├── notebooks/                # Jupyter experiments
-│   └── code.ipynb            # Development notebook
-│
-├── src/                      # Core modules
-│   ├── __init__.py           # Package initialization
-│   ├── config.py             # Paths & hyperparameters
-│   ├── data.py               # Data loading & augmentation
-│   ├── evaluate.py           # Model evaluation & metrics
-│   ├── features.py           # Feature extraction methods
-│   ├── model.py              # CNN architecture
-│   ├── preprocessing.py      # Image preprocessing & thresholding
-│   ├── train.py              # Training loop & optimizer
-│   └── utils.py              # Helper functions
-│
-├── .gitignore                 # Git ignore patterns
-├── README.md                  # Project documentation
-├── main.py                    # CLI for training/evaluation
-├── predict.py                 # CLI for predictions
-├── requirements.txt           # Project dependencies
-└── run.sh                     # Quick start script (Linux/Mac)
+├── .gitignore                 # Git ignore file
+├── run.sh                     # run script
+└── requirements.txt           # Python dependencies
 ```
 
-## 🚀 Quick Start
+<body>
+    <div style = "
+        width: 100%;
+        border-radius: 100px;
+        height: 20px;
+        background: linear-gradient(to right,#B6AE9F,#C5C7BC,#DEDED1,#C5C7BC,#B6AE9F);">
+    </div>
+</body>
 
-### Option 1: Automated (Recommended)
+## **Quick Start**
+
+### Prerequisites
+
+- Python 3.8+
+- pip
+- (Optional) CUDA-capable GPU for faster inference
+
+### Installation & Running
 
 ```bash
-chmod +x run.sh && ./run.sh
+# Make script executable
+chmod +x run.sh
+
+# Run the system
+./run.sh
 ```
 
-Opens:
-- Backend API: `http://localhost:8000` (+ docs at `/docs`)
-- Frontend: Opens in default browser automatically
+The script will:
+1. ✅ Check Python installation
+2. 📦 Create virtual environment (if needed)
+3. 📥 Install all dependencies
+4. 🔍 Verify model file exists
+5. 🚀 Start backend server
+6. 🌐 Open browser automatically
 
-### Option 2: Manual Setup
+### Manual Installation
 
-**1. Install Dependencies**
 ```bash
+# Create virtual environment
+python -m venv venv
+
+# Activate virtual environment
+# Windows:
+venv\Scripts\activate
+# Linux/Mac:
+source venv/bin/activate
+
+# Install dependencies
 pip install -r requirements.txt
-```
 
-**2. Start Backend**
-```bash
+# Run backend
 cd Backend
-python main.py
+python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-**3. Open Frontend**
-Open `Frontend/index.html` in your browser
+<body>
+    <div style = "
+        width: 100%;
+        border-radius: 100px;
+        height: 20px;
+        background: linear-gradient(to right,#B6AE9F,#C5C7BC,#DEDED1,#C5C7BC,#B6AE9F);">
+    </div>
+</body>
 
-## 🎯 Usage
+## **🌐 Access Points**
 
-### Web Interface (Recommended)
+Once running, access the system at:
 
-1. **Upload Image**: Drag & drop traffic sign image
-2. **Preprocess**: Adjust resize, denoise, brightness, contrast
-3. **Segment**: Choose Otsu/Adaptive/Chow-Kaneko/Cheng-Jin-Kuo methods
-4. **Classify**: Get prediction with confidence + top 5 results
+- **Frontend**: http://localhost:8000
+- **API Documentation**: http://localhost:8000/docs
+- **API Health Check**: http://localhost:8000/api/health
 
-### CLI Tools
+<body>
+    <div style = "
+        width: 100%;
+        border-radius: 100px;
+        height: 20px;
+        background: linear-gradient(to right,#B6AE9F,#C5C7BC,#DEDED1,#C5C7BC,#B6AE9F);">
+    </div>
+</body>
 
-**Train Model:**
+## **🎯 API Endpoints**
+
+### Health Check
+```http
+GET /api/health
+```
+
+### Upload Image
+```http
+POST /api/upload
+Content-Type: multipart/form-data
+
+Body: file (image file)
+```
+
+### Preprocess Image
+```http
+POST /api/preprocess
+Content-Type: application/json
+
+{
+  "image": "base64_encoded_image",
+  "params": {
+    "resize_width": 64,
+    "resize_height": 64,
+    "noise_reduction": 5,
+    "brightness_alpha": 1.0,
+    "brightness_beta": 50,
+    "contrast": 2,
+    "to_grayscale": true
+  }
+}
+```
+
+### Segment Image
+```http
+POST /api/segment
+Content-Type: application/json
+
+{
+  "image": "base64_encoded_image",
+  "params": {
+    "method": "otsu",
+    "block_size": 15,
+    "c": 5,
+    "k": 0.5
+  }
+}
+```
+
+### Classify Image
+```http
+POST /api/classify
+Content-Type: application/json
+
+{
+  "image": "base64_encoded_image"
+}
+```
+
+<body>
+    <div style = "
+        width: 100%;
+        border-radius: 100px;
+        height: 20px;
+        background: linear-gradient(to right,#B6AE9F,#C5C7BC,#DEDED1,#C5C7BC,#B6AE9F);">
+    </div>
+</body>
+
+## **🧠 Model Architecture**
+
+### CNN Model
+```
+Input: (1, 64, 64) - Grayscale image
+
+Features:
+├── Conv2D(1→32)  + BatchNorm + ReLU + MaxPool
+└── Conv2D(32→64) + BatchNorm + ReLU + MaxPool
+
+Classifier:
+├── Linear(64×16×16 → 128) + ReLU + Dropout(0.5)
+└── Linear(128 → 43) - Output classes
+```
+
+### Training Details
+- **Optimizer**: Adam (lr=0.001, weight_decay=1e-5)
+- **Loss**: CrossEntropyLoss with label smoothing (0.1)
+- **Scheduler**: ReduceLROnPlateau
+- **Dataset**: German Traffic Sign Recognition Benchmark (GTSRB)
+- **Accuracy**: 95%+ on test set
+
+<body>
+    <div style = "
+        width: 100%;
+        border-radius: 100px;
+        height: 20px;
+        background: linear-gradient(to right,#B6AE9F,#C5C7BC,#DEDED1,#C5C7BC,#B6AE9F);">
+    </div>
+</body>
+
+## **> Preprocessing Pipeline**
+
+1. **Resize** - Standardize to 64×64 pixels
+2. **Brightness Adjustment** - Enhance dark images
+3. **Contrast Enhancement** - CLAHE (Contrast Limited Adaptive Histogram Equalization)
+4. **Noise Reduction** - Gaussian blur (5×5)
+5. **Thresholding** - Otsu's method (or alternative methods)
+6. **Edge Detection** - Canny edge detection
+7. **Edge Thickening** - Dilation for better visibility
+8. **Normalization** - MinMax scaling to [0, 1]
+
+<body>
+    <div style = "
+        width: 100%;
+        border-radius: 100px;
+        height: 20px;
+        background: linear-gradient(to right,#B6AE9F,#C5C7BC,#DEDED1,#C5C7BC,#B6AE9F);">
+    </div>
+</body>
+
+## **> Traffic Sign Classes**
+
+The system recognizes 43 classes including:
+- Speed limits (20-120 km/h)
+- Prohibitory signs (No entry, No passing, Stop, Yield)
+- Danger warnings (Curves, Slippery road, Road work)
+- Mandatory signs (Turn directions, Keep right/left)
+- And more...
+
+<body>
+    <div style = "
+        width: 100%;
+        border-radius: 100px;
+        height: 20px;
+        background: linear-gradient(to right,#B6AE9F,#C5C7BC,#DEDED1,#C5C7BC,#B6AE9F);">
+    </div>
+</body>
+
+## **> Technology Stack**
+
+### Backend
+- **FastAPI** - Modern, fast web framework
+- **PyTorch** - Deep learning framework
+- **OpenCV** - Computer vision operations
+- **Pydantic** - Data validation
+- **Uvicorn** - ASGI server
+
+### Frontend
+- **HTML5/CSS3** - Modern web standards
+- **Vanilla JavaScript** - No framework dependencies
+- **Font Awesome** - Icon library
+
+<body>
+    <div style = "
+        width: 100%;
+        border-radius: 100px;
+        height: 20px;
+        background: linear-gradient(to right,#B6AE9F,#C5C7BC,#DEDED1,#C5C7BC,#B6AE9F);">
+    </div>
+</body>
+
+## **🐛 Troubleshooting**
+
+### - Model Not Found
+```
+❌ ERROR: Model file not found at notebooks/best_model.pth
+```
+**Solution**: Ensure `best_model.pth` exists in the `notebooks/` folder
+
+### - Port Already in Use
+```
+⚠️ Port 8000 is in use
+```
+**Solution**: The script automatically kills existing processes. If issue persists, manually kill:
 ```bash
-python main.py train --epochs 30 --batch-size 32
+# Windows
+netstat -ano | findstr :8000
+taskkill /PID <PID> /F
+
+# Linux/Mac
+lsof -ti:8000 | xargs kill -9
 ```
 
-**Evaluate:**
-```bash
-python main.py evaluate --checkpoint models/traffic_sign_model.pth
-```
+### - CUDA Not Available
+The system automatically falls back to CPU if CUDA is not available.
 
-**Predict:**
-```bash
-# Single image
-python predict.py --image path/to/sign.jpg
+<body>
+    <div style = "
+        width: 100%;
+        height: 20px;
+        background: linear-gradient(to right,#B6AE9F,#C5C7BC,#DEDED1,#C5C7BC,#B6AE9F);">
+    </div>
+</body>
 
-# Batch directory
-python predict.py --directory path/to/images/
-```
-
-## 🔧 API Endpoints
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/` | GET | Health check |
-| `/api/health` | GET | System health (GPU, model status) |
-| `/api/upload` | POST | Upload image |
-| `/api/preprocess` | POST | Image preprocessing |
-| `/api/segment` | POST | Image segmentation |
-| `/api/extract_features` | POST | Feature extraction |
-| `/api/classify` | POST | Classify traffic sign |
-| `/api/classes` | GET | List all 43 classes |
-
-Full API documentation: `http://localhost:8000/docs`
-
-## 📊 Traffic Sign Classes (43 Total)
-
-- **Speed Limits**: 20, 30, 50, 60, 70, 80, 100, 120 km/h
-- **Warnings**: Curves, pedestrians, children, animals, bumpy road, etc.
-- **Mandatory**: Straight, turn right/left, roundabout, keep right/left
-- **Prohibitions**: No entry, no passing, no vehicles, weight limits
-
----
-
-## **📚 Dataset**
-
-[German Traffic Sign Recognition Benchmark (GTSRB)](https://www.kaggle.com/datasets/meowmeowmeowmeowmeow/gtsrb-german-traffic-sign)
-- 50,000+ images
-- 43 classes
-- Various lighting/weather conditions
+> [!NOTE]
+> Thank you for using the Traffic Sign Recognition System! happy driving!

@@ -13,11 +13,12 @@ const state = {
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
     initializeApp();
+    // Check API health every 5 seconds
+    setInterval(checkAPIHealth, 5000);
 });
 
 function initializeApp() {
     checkAPIHealth();
-    setupEventListeners();
     setupFileUpload();
     setupTabs();
     setupSliders();
@@ -98,7 +99,6 @@ async function handleFileUpload(file) {
             state.originalImage = data.original_image;
             displayImage('originalPreview', data.original_image);
             displayImage('segmentationInput', data.original_image);
-            displayImage('featuresInput', data.original_image);
             displayImage('classificationInput', data.original_image);
 
             // Auto-apply preprocessing if enabled
@@ -144,19 +144,19 @@ function switchTab(tabName) {
 
 // Slider Updates
 function setupSliders() {
-    const sliders = [
-        { id: 'resizeWidth', valueId: 'resizeWidthValue' },
-        { id: 'resizeHeight', valueId: 'resizeHeightValue' },
-        { id: 'noiseReduction', valueId: 'noiseReductionValue' },
-        { id: 'brightnessAlpha', valueId: 'brightnessAlphaValue' },
-        { id: 'brightnessBeta', valueId: 'brightnessBetaValue' },
-        { id: 'contrast', valueId: 'contrastValue' },
-        { id: 'blockSize', valueId: 'blockSizeValue' },
-        { id: 'cParam', valueId: 'cValue' },
-        { id: 'kParam', valueId: 'kValue' },
+    const sliderConfigs = [
+        { id: 'resizeWidth', valueId: 'resizeWidthValue', type: 'preprocessing' },
+        { id: 'resizeHeight', valueId: 'resizeHeightValue', type: 'preprocessing' },
+        { id: 'noiseReduction', valueId: 'noiseReductionValue', type: 'preprocessing' },
+        { id: 'brightnessAlpha', valueId: 'brightnessAlphaValue', type: 'preprocessing' },
+        { id: 'brightnessBeta', valueId: 'brightnessBetaValue', type: 'preprocessing' },
+        { id: 'contrast', valueId: 'contrastValue', type: 'preprocessing' },
+        { id: 'blockSize', valueId: 'blockSizeValue', type: 'segmentation' },
+        { id: 'cParam', valueId: 'cValue', type: 'segmentation' },
+        { id: 'kParam', valueId: 'kValue', type: 'segmentation' },
     ];
 
-    sliders.forEach(({ id, valueId }) => {
+    sliderConfigs.forEach(({ id, valueId, type }) => {
         const slider = document.getElementById(id);
         const valueDisplay = document.getElementById(valueId);
 
@@ -165,15 +165,13 @@ function setupSliders() {
                 valueDisplay.textContent = e.target.value;
 
                 if (state.autoUpdate && state.originalImage) {
-                    if (id.startsWith('block') || id === 'cParam' || id === 'kParam') {
-                        // Segmentation parameter
-                        if (state.segmentedImage || document.getElementById('segmentationSource').value === 'original' || document.getElementById('segmentationSource').value === 'preprocessed') {
-                            debounce(() => applySegmentation(), 500)();
+                    debounce(() => {
+                        if (type === 'preprocessing') {
+                            applyPreprocessing();
+                        } else if (type === 'segmentation') {
+                            applySegmentation();
                         }
-                    } else {
-                        // Preprocessing parameter
-                        debounce(() => applyPreprocessing(), 500)();
-                    }
+                    }, 500)();
                 }
             });
         }
@@ -198,6 +196,7 @@ function setupPreprocessingControls() {
     });
 
     applyButton.addEventListener('click', applyPreprocessing);
+
     useNextButton.addEventListener('click', () => {
         if (state.preprocessedImage) {
             document.getElementById('segmentationSource').value = 'preprocessed';
@@ -272,6 +271,7 @@ function setupSegmentationControls() {
     });
 
     applyButton.addEventListener('click', applySegmentation);
+
     useNextButton.addEventListener('click', () => {
         if (state.segmentedImage) {
             document.getElementById('classificationSource').value = 'segmented';
@@ -281,6 +281,9 @@ function setupSegmentationControls() {
             alert('Please apply segmentation first.');
         }
     });
+
+    // Initialize UI
+    updateSegmentationMethodUI();
 }
 
 function updateSegmentationInput() {
@@ -304,22 +307,21 @@ function updateSegmentationMethodUI() {
     const cValueGroup = document.getElementById('cValueGroup');
     const kValueGroup = document.getElementById('kValueGroup');
 
-    // Show/hide controls based on method
+    // Reset all
+    blockSizeGroup.style.display = 'none';
+    cValueGroup.style.display = 'none';
+    kValueGroup.style.display = 'none';
+
+    // Show controls based on method
     if (method === 'otsu') {
-        blockSizeGroup.style.display = 'none';
-        cValueGroup.style.display = 'none';
-        kValueGroup.style.display = 'none';
+    // No additional controls for Otsu
     } else if (method === 'adaptive_mean') {
         blockSizeGroup.style.display = 'block';
         cValueGroup.style.display = 'block';
-        kValueGroup.style.display = 'none';
     } else if (method === 'chow_kaneko') {
         blockSizeGroup.style.display = 'block';
-        cValueGroup.style.display = 'none';
-        kValueGroup.style.display = 'none';
     } else if (method === 'cheng_jin_kuo') {
         blockSizeGroup.style.display = 'block';
-        cValueGroup.style.display = 'none';
         kValueGroup.style.display = 'block';
     }
 }
@@ -436,37 +438,7 @@ async function classifyImage() {
         const data = await response.json();
 
         if (data.success && data.prediction) {
-            // Display main prediction
-            const predictionMain = document.getElementById('predictionMain');
-            const className = predictionMain.querySelector('.prediction-class');
-            const confidenceFill = predictionMain.querySelector('.confidence-fill');
-            const confidenceText = predictionMain.querySelector('.confidence-text');
-
-            className.textContent = data.prediction.class_name;
-            const confidencePercent = (data.prediction.confidence * 100).toFixed(2);
-            confidenceFill.style.width = `${confidencePercent}%`;
-            confidenceText.textContent = `${confidencePercent}%`;
-
-            // Display top 5 predictions
-            const topPredictions = document.getElementById('topPredictions');
-            topPredictions.innerHTML = '';
-
-            data.top5_predictions.forEach(pred => {
-                const item = document.createElement('div');
-                item.className = 'top-prediction-item';
-
-                const name = document.createElement('span');
-                name.className = 'prediction-name';
-                name.textContent = pred.class_name;
-
-                const prob = document.createElement('span');
-                prob.className = 'prediction-prob';
-                prob.textContent = `${(pred.confidence * 100).toFixed(2)}%`;
-
-                item.appendChild(name);
-                item.appendChild(prob);
-                topPredictions.appendChild(item);
-            });
+            displayPredictionResult(data);
         } else if (data.error) {
             alert(data.error);
         }
@@ -475,6 +447,42 @@ async function classifyImage() {
         alert('Error classifying image. Please try again.');
     } finally {
         hideLoading();
+    }
+}
+
+function displayPredictionResult(data) {
+    // Display main prediction
+    const predictionMain = document.getElementById('predictionMain');
+    const className = predictionMain.querySelector('.prediction-class');
+    const confidenceFill = predictionMain.querySelector('.confidence-fill');
+    const confidenceText = predictionMain.querySelector('.confidence-text');
+
+    className.textContent = data.prediction.class_name;
+    const confidencePercent = (data.prediction.confidence * 100).toFixed(2);
+    confidenceFill.style.width = `${confidencePercent}%`;
+    confidenceText.textContent = `${confidencePercent}%`;
+
+    // Display top 5 predictions
+    const topPredictions = document.getElementById('topPredictions');
+    topPredictions.innerHTML = '';
+
+    if (data.top5_predictions && Array.isArray(data.top5_predictions)) {
+        data.top5_predictions.forEach(pred => {
+            const item = document.createElement('div');
+            item.className = 'top-prediction-item';
+
+            const name = document.createElement('span');
+            name.className = 'prediction-name';
+            name.textContent = pred.class_name;
+
+            const prob = document.createElement('span');
+            prob.className = 'prediction-prob';
+            prob.textContent = `${(pred.confidence * 100).toFixed(2)}%`;
+
+            item.appendChild(name);
+            item.appendChild(prob);
+            topPredictions.appendChild(item);
+        });
     }
 }
 
@@ -503,47 +511,14 @@ function hideLoading() {
 function debounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
         clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
+        timeout = setTimeout(() => {
+            func(...args);
+        }, wait);
     };
 }
 
-// Event Listeners
-function setupEventListeners() {
-    // Smooth scrolling for navigation
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }
-        });
-    });
-
-    // Update nav active state on scroll
-    window.addEventListener('scroll', () => {
-        const sections = document.querySelectorAll('section[id]');
-        const scrollY = window.pageYOffset;
-
-        sections.forEach(section => {
-            const sectionHeight = section.offsetHeight;
-            const sectionTop = section.offsetTop - 100;
-            const sectionId = section.getAttribute('id');
-            const navLink = document.querySelector(`.nav-link[href="#${sectionId}"]`);
-
-            if (scrollY > sectionTop && scrollY <= sectionTop + sectionHeight) {
-                navLink?.classList.add('active');
-            } else {
-                navLink?.classList.remove('active');
-            }
-        });
-    });
-}
+// Initialize segmentation UI on load
+document.addEventListener('DOMContentLoaded', () => {
+    updateSegmentationMethodUI();
+});
