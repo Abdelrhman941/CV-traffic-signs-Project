@@ -33,7 +33,18 @@ def set_model(loaded_model, model_device):
     model = loaded_model
     device = model_device
 
-
+"""
+-> `decode_base64_image` prepares incoming images for computer vision processing, while `encode_image_to_base64` converts processed images into a web-friendly format for API responses.
+Frontend
+    ↓ (Base64)
+decode_base64_image   ❌ (not shown)
+    ↓
+Processing / Model
+    ↓
+encode_image_to_base64 ✅ (this is what is returned)
+    ↓
+Frontend
+"""
 def decode_base64_image(base64_str: str) -> np.ndarray:
     """Decode base64 string to numpy array (OpenCV format)."""
     try:
