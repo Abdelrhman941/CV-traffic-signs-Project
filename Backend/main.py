@@ -108,15 +108,15 @@ async def startup_event():
         set_model(model, device)
 
         print("✅ Model loaded successfully!")
-        print(f"   Classes: {NUM_CLASSES}")
-        print(f"   Input size: {IMAGE_SIZE}")
+        print(f"   Classes    : {NUM_CLASSES}")
+        print(f"   Input size : {IMAGE_SIZE}")
     except Exception as e:
         print(f"❌ ERROR loading model: {e}")
         return
 
     print("=" * 60)
-    print(f"🌐 Server running at: http://localhost:{PORT}")
-    print(f"📖 API docs at: http://localhost:{PORT}/docs")
+    print(f"🌐 Server running at : http://localhost:{PORT}")
+    print(f"📖 API docs at       : http://localhost:{PORT}/docs")
     print("=" * 60)
 
 
