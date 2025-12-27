@@ -1,6 +1,4 @@
-"""
-FastAPI Backend for Traffic Sign Recognition System.
-"""
+"""FastAPI Backend for Traffic Sign Recognition System."""
 
 import torch
 import torch.nn as nn
@@ -78,7 +76,7 @@ if frontend_path.exists():
     )
 
 
-@app.on_event("startup")
+@app.on_event("startup")        # to avoid reload model in every request, it just load once
 async def startup_event():
     """Load model on startup."""
     print("=" * 60)
